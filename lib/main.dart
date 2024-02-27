@@ -1,49 +1,43 @@
-import 'package:amplify_authenticator/amplify_authenticator.dart';
+import 'package:amplify_api/amplify_api.dart';
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amplify_auth/amplifyconfiguration.dart';
-import 'package:flutter_amplify_auth/screens/home.dart';
+import 'package:flutter_amplify_auth/app.dart';
+import 'package:flutter_amplify_auth/infrastructure/auth/auth_service.dart';
+import 'package:flutter_amplify_auth/models/ModelProvider.dart';
+import 'package:flutter_amplify_auth/redux/app_state.dart';
+import 'package:flutter_amplify_auth/redux/store_factory.dart';
+import 'package:redux/redux.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _configureAmplify();
+
+  final store = _buildStore();
+
+  runApp(App(store: store));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+Store<AppState> _buildStore() {
+  final amplifyAuth = Amplify.Auth;
 
-  @override
-  State<MyApp> createState() => _MyAppState();
+  return createStore(
+    initialState: AppState.initial(),
+    authService: AuthService(amplifyAuth: amplifyAuth),
+  );
 }
 
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    _configureAmplify();
-  }
+Future<void> _configureAmplify() async {
+  try {
+    final api = AmplifyAPI(modelProvider: ModelProvider.instance);
+    final auth = AmplifyAuthCognito();
 
-  @override
-  Widget build(BuildContext context) {
-    return Authenticator(
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
-          useMaterial3: true,
-        ),
-        initialRoute: HomePage.routeName,
-        routes: {
-          HomePage.routeName: (context) => const HomePage(),
-        },
-      ),
-    );
-  }
+    await Amplify.addPlugins([api, auth]);
+    await Amplify.configure(amplifyconfig);
 
-  Future<void> _configureAmplify() async {
-    try {
-      await Amplify.configure(amplifyconfig);
-    } catch (error) {
-      print("Could not configure Amplify: $error");
-    }
+    debugPrint("Amplify configured");
+  } catch (error) {
+    debugPrint("Could not configure Amplify: $error");
   }
 }

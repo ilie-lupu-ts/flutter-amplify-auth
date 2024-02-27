@@ -39,6 +39,10 @@ dependencies:
   amplify_auth_cognito: ^1.6.2
   amplify_authenticator: ^1.5.3
   amplify_flutter: ^1.6.1
+  flutter_form_builder: ^9.2.0
+  redux: ^5.0.0
+  flutter_redux: ^0.10.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

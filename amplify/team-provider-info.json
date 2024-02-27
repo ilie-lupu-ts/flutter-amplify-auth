@@ -14,6 +14,9 @@
     "categories": {
       "api": {
         "flutteramplifyauth": {}
+      },
+      "auth": {
+        "flutteramplifyauth832ef0b8": {}
       }
     }
   }
