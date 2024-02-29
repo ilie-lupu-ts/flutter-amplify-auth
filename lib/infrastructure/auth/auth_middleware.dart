@@ -34,21 +34,26 @@ class AuthMiddleware extends MiddlewareClass<AppState> {
 
       if (response is SignInSuccessResponse) {
         store.dispatch(SignInSuccessEventAction(user: response.user));
-      } else if (response is AuthServiceErrorResponse) {
-        if (response.errorType == AuthErrorType.userNotConfirmed) {
-          final confirmationCodeResponse = await authService.sendSignUpCode(username: action.username);
+        return;
+      }
 
-          if (confirmationCodeResponse is SendSignUpCodeSuccessResponse) {
-            store.dispatch(SignUpSuccessEventAction(
-              userId: action.username,
-              password: action.password,
-              codeDeliveryDestination: confirmationCodeResponse.codeDeliveryDestination,
-            ));
-            return;
-          }
-        }
-
+      if (response is AuthServiceErrorResponse && response.errorType != AuthErrorType.userNotConfirmed) {
         store.dispatch(AuthErrorEventAction(errorType: response.errorType));
+        return;
+      }
+
+      if (response is AuthServiceErrorResponse && response.errorType == AuthErrorType.userNotConfirmed) {
+        final confirmationCodeResponse = await authService.sendSignUpCode(username: action.username);
+
+        if (confirmationCodeResponse is SendSignUpCodeSuccessResponse) {
+          store.dispatch(SignUpSuccessEventAction(
+            userId: action.username,
+            password: action.password,
+            codeDeliveryDestination: confirmationCodeResponse.codeDeliveryDestination,
+          ));
+        } else if (confirmationCodeResponse is AuthServiceErrorResponse) {
+          store.dispatch(AuthErrorEventAction(errorType: confirmationCodeResponse.errorType));
+        }
       }
     }
 
@@ -95,6 +100,7 @@ class AuthMiddleware extends MiddlewareClass<AppState> {
 
         if (signIn is SignInSuccessResponse) {
           store.dispatch(SignInSuccessEventAction(user: signIn.user));
+          return;
         } else if (signIn is AuthServiceErrorResponse) {
           store.dispatch(SignUpConfirmErrorEventAction(
             userId: state.userId,
@@ -145,6 +151,39 @@ class AuthMiddleware extends MiddlewareClass<AppState> {
         ));
       } else if (response is AuthServiceErrorResponse) {
         store.dispatch(AuthErrorEventAction(errorType: response.errorType));
+      }
+    }
+
+    if (action is RequestResetPasswordCommandAction) {
+      store.dispatch(AuthLoadingEventAction());
+
+      final response = await authService.resetPassword(username: action.username);
+
+      if (response is ResetPasswordSuccessResponse) {
+        store.dispatch(ResetPasswordSuccessEventAction(
+          username: response.username,
+        ));
+      } else if (response is AuthServiceErrorResponse) {
+        store.dispatch(AuthErrorEventAction(errorType: response.errorType));
+      }
+    }
+
+    if (action is ConfirmResetPasswordCommandAction) {
+      store.dispatch(AuthLoadingEventAction());
+
+      final response = await authService.confirmResetPassword(
+        username: action.username,
+        newPassword: action.password,
+        confirmationCode: action.confirmationCode,
+      );
+
+      if (response is ConfirmPasswordResetSuccessResponse) {
+        store.dispatch(PasswordResetConfirmedEventAction());
+      } else if (response is AuthServiceErrorResponse) {
+        store.dispatch(ResetPasswordErrorEventAction(
+          username: action.username,
+          errorType: response.errorType,
+        ));
       }
     }
   }

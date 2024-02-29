@@ -8,11 +8,17 @@ class AuthPresenter {
     if (authState is AuthenticatedState) {
       return AuthenticatedViewModel(user: authState.user);
     } else if (authState is AuthSignUpState) {
-      return SignUpConfirmViewModel(
+      return SignUpViewModel(
         userId: authState.userId,
         codeDeliveryDestination: authState.codeDeliveryDestination,
         isLoading: authState.isLoading,
         isRequestingConfirmationCode: authState.isRequestingConfirmationCode,
+        errorType: authState.errorType,
+      );
+    } else if (authState is AuthResetPasswordState) {
+      return ResetPasswordViewModel(
+        username: authState.username,
+        isLoading: authState.isLoading,
         errorType: authState.errorType,
       );
     } else if (authState is AuthLoadingState) {
@@ -60,14 +66,14 @@ class AuthenticatedViewModel extends AuthViewModel {
   List<Object?> get props => [];
 }
 
-class SignUpConfirmViewModel extends AuthViewModel {
+class SignUpViewModel extends AuthViewModel {
   final String userId;
   final String codeDeliveryDestination;
   final bool isLoading;
   final bool isRequestingConfirmationCode;
   final AuthErrorType? errorType;
 
-  SignUpConfirmViewModel({
+  SignUpViewModel({
     required this.userId,
     required this.codeDeliveryDestination,
     required this.isLoading,
@@ -83,14 +89,33 @@ class SignUpConfirmViewModel extends AuthViewModel {
   List<Object?> get props => [userId, codeDeliveryDestination, isLoading, errorType, isRequestingConfirmationCode];
 }
 
-String _mapErrorTypeToMessage(AuthErrorType errorType) {
+class ResetPasswordViewModel extends AuthViewModel {
+  final String username;
+  final bool isLoading;
+  final AuthErrorType? errorType;
+
+  ResetPasswordViewModel({
+    required this.username,
+    required this.isLoading,
+    this.errorType,
+  });
+
+  String get errorMessage => _mapErrorTypeToMessage(errorType!);
+
+  @override
+  List<Object?> get props => [username, isLoading, errorType];
+}
+
+String _mapErrorTypeToMessage(AuthErrorType? errorType) {
   if (errorType == AuthErrorType.userNotFound) {
     return "This email address is not associated with any account";
   } else if (errorType == AuthErrorType.usernameExists) {
     return "This email address is already in use";
   } else if (errorType == AuthErrorType.wrongConfirmationCode) {
     return "The code you entered is incorrect";
+  } else if (errorType == AuthErrorType.tryAgainLater) {
+    return "An error has occurred. Please try again later";
   }
 
-  return "An error occurred";
+  return "An error has occurred";
 }

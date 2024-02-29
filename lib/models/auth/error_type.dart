@@ -4,5 +4,6 @@ enum AuthErrorType {
   usernameExists,
   wrongConfirmationCode,
   userNotConfirmed,
+  tryAgainLater,
   unknown,
 }

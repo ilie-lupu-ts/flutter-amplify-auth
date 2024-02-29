@@ -109,6 +109,40 @@ class AuthService {
     }
   }
 
+  Future<AuthServiceResponse> resetPassword({required String username}) async {
+    try {
+      final response = await amplifyAuth.resetPassword(username: username);
+
+      if (response.nextStep.updateStep == AuthResetPasswordStep.confirmResetPasswordWithCode) {
+        final codeDeliveryDestination = response.nextStep.codeDeliveryDetails?.destination ?? "";
+
+        return ResetPasswordSuccessResponse(username: username, codeDeliveryDestination: codeDeliveryDestination);
+      }
+
+      return AuthServiceErrorResponse(errorType: AuthErrorType.unknown);
+    } catch (error) {
+      return _processError(error);
+    }
+  }
+
+  Future<AuthServiceResponse> confirmResetPassword({
+    required String username,
+    required String confirmationCode,
+    required String newPassword,
+  }) async {
+    try {
+      await amplifyAuth.confirmResetPassword(
+        username: username,
+        newPassword: newPassword,
+        confirmationCode: confirmationCode,
+      );
+
+      return ConfirmPasswordResetSuccessResponse();
+    } catch (error) {
+      return _processError(error);
+    }
+  }
+
   AuthServiceResponse _processError(dynamic error) {
     if (error is UserNotFoundException) {
       return AuthServiceErrorResponse(errorType: AuthErrorType.userNotFound);
@@ -118,6 +152,8 @@ class AuthService {
       return AuthServiceErrorResponse(errorType: AuthErrorType.usernameExists);
     } else if (error is CodeMismatchException) {
       return AuthServiceErrorResponse(errorType: AuthErrorType.wrongConfirmationCode);
+    } else if (error is LimitExceededException) {
+      return AuthServiceErrorResponse(errorType: AuthErrorType.tryAgainLater);
     }
 
     return AuthServiceErrorResponse(errorType: AuthErrorType.unknown);
@@ -185,3 +221,15 @@ class AuthServiceErrorResponse extends AuthServiceResponse {
   @override
   List<Object?> get props => [errorType];
 }
+
+class ResetPasswordSuccessResponse extends AuthServiceResponse {
+  final String username;
+  final String codeDeliveryDestination;
+
+  ResetPasswordSuccessResponse({required this.username, required this.codeDeliveryDestination});
+
+  @override
+  List<Object?> get props => [username, codeDeliveryDestination];
+}
+
+class ConfirmPasswordResetSuccessResponse extends AuthServiceResponse {}

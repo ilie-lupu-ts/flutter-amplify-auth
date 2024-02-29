@@ -32,6 +32,21 @@ class AuthSignUpState extends AuthState {
   List<Object> get props => [userId, password, codeDeliveryDestination, isLoading, isRequestingConfirmationCode];
 }
 
+class AuthResetPasswordState extends AuthState {
+  final String username;
+  final bool isLoading;
+  final AuthErrorType? errorType;
+
+  AuthResetPasswordState({
+    required this.username,
+    this.isLoading = false,
+    this.errorType,
+  });
+
+  @override
+  List<Object> get props => [username, isLoading];
+}
+
 class AuthenticatedState extends AuthState {
   final User user;
 

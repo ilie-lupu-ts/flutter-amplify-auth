@@ -31,6 +31,17 @@ AuthState authReducer(AuthState state, dynamic action) {
       codeDeliveryDestination: action.codeDeliveryDestination,
       errorType: action.errorType,
     );
+  } else if (action is ResetPasswordSuccessEventAction) {
+    return AuthResetPasswordState(
+      username: action.username,
+    );
+  } else if (action is ResetPasswordErrorEventAction) {
+    return AuthResetPasswordState(
+      username: action.username,
+      errorType: action.errorType,
+    );
+  } else if (action is PasswordResetConfirmedEventAction) {
+    return AuthInitialState();
   } else if (action is SignedOutEventAction) {
     return AuthInitialState();
   }

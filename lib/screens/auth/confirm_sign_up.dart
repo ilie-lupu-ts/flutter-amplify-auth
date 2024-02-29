@@ -49,14 +49,14 @@ class _ConfirmSignUpPageState extends State<ConfirmSignUpPage> {
                 const SizedBox(height: Spacings.x_10),
                 Text("Confirm your email", style: TextStyles.heading4),
                 const SizedBox(height: Spacings.x_2_5),
-                if (viewModel is SignUpConfirmViewModel)
+                if (viewModel is SignUpViewModel)
                   Text(
                     "Your code is on the way. To log in, enter the code we emailed you to ${viewModel.codeDeliveryDestination}. It may take a minute to arrive.",
                     style: TextStyles.small,
                     textAlign: TextAlign.center,
                   ),
                 const SizedBox(height: Spacings.x_10),
-                if (viewModel is SignUpConfirmViewModel && viewModel.errorType != null) ...[
+                if (viewModel is SignUpViewModel && viewModel.errorType != null) ...[
                   Alert(variant: AlertVariant.error, message: viewModel.errorMessage),
                   const SizedBox(height: Spacings.x_10),
                 ],
@@ -85,7 +85,7 @@ class _ConfirmSignUpPageState extends State<ConfirmSignUpPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           InkWell(
-                            onTap: viewModel is SignUpConfirmViewModel && !viewModel.isRequestingConfirmationCode
+                            onTap: viewModel is SignUpViewModel && !viewModel.isRequestingConfirmationCode
                                 ? () {
                                     StoreProvider.of<AppState>(context).dispatch(
                                       RequestSignUpConfirmationCodeCommandAction(username: viewModel.userId),
@@ -95,7 +95,7 @@ class _ConfirmSignUpPageState extends State<ConfirmSignUpPage> {
                             child: Text(
                               "Request a new code",
                               style: TextStyles.link.copyWith(
-                                  color: viewModel is SignUpConfirmViewModel && viewModel.canRequestNewCode
+                                  color: viewModel is SignUpViewModel && viewModel.canRequestNewCode
                                       ? AppTheme.getColors().font.interactive
                                       : AppTheme.getColors().font.disabled),
                             ),
@@ -106,7 +106,7 @@ class _ConfirmSignUpPageState extends State<ConfirmSignUpPage> {
                       ListenableBuilder(
                         listenable: _canSubmit,
                         builder: (context, child) => Button(
-                          loading: viewModel is SignUpConfirmViewModel && viewModel.isLoading,
+                          loading: viewModel is SignUpViewModel && viewModel.isLoading,
                           onPressed: _canSubmit.value
                               ? () {
                                   final confirmationCode = _formKey.currentState?.fields['confirmationCode']?.value;

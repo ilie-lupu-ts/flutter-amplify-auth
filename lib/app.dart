@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_amplify_auth/design/theme/default.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
 import 'package:flutter_amplify_auth/screens/add_todo.dart';
+import 'package:flutter_amplify_auth/screens/auth/confirm_forgot_password.dart';
 import 'package:flutter_amplify_auth/screens/auth/confirm_sign_up.dart';
 import 'package:flutter_amplify_auth/screens/auth/forgot_password.dart';
 import 'package:flutter_amplify_auth/screens/auth/sign_in.dart';
@@ -26,12 +27,13 @@ class App extends StatelessWidget {
         initialRoute: LoadingPage.routeName,
         routes: {
           LoadingPage.routeName: (context) => const LoadingPage(),
-          HomePage.routeName: (context) => const HomePage(),
-          AddTodoPage.routeName: (context) => const AddTodoPage(),
           SignInPage.routeName: (context) => const SignInPage(),
           SignUpPage.routeName: (context) => const SignUpPage(),
           ConfirmSignUpPage.routeName: (context) => const ConfirmSignUpPage(),
           ForgotPasswordPage.routeName: (context) => const ForgotPasswordPage(),
+          ConfirmResetPasswordPage.routeName: (context) => const ConfirmResetPasswordPage(),
+          HomePage.routeName: (context) => const HomePage(),
+          AddTodoPage.routeName: (context) => const AddTodoPage(),
         },
       ),
     );

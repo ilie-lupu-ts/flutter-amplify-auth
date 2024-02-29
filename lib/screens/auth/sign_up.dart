@@ -36,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
       converter: (store) => AuthPresenter.present(authState: store.state.authState),
       distinct: true,
       onWillChange: (previousViewModel, newViewModel) {
-        if (newViewModel is SignUpConfirmViewModel) {
+        if (newViewModel is SignUpViewModel) {
           Navigator.pushReplacementNamed(context, ConfirmSignUpPage.routeName);
         }
       },

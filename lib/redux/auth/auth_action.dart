@@ -3,6 +3,12 @@ import 'package:flutter_amplify_auth/models/auth/error_type.dart';
 
 class AuthLoadingEventAction {}
 
+class GetAuthenticatedUserCommandAction {}
+
+class SignOutCommandAction {}
+
+class SignedOutEventAction {}
+
 class SignInCommandAction {
   final String username;
   final String password;
@@ -63,17 +69,47 @@ class RequestSignUpConfirmationCodeCommandAction {
   RequestSignUpConfirmationCodeCommandAction({required this.username});
 }
 
-class GetAuthenticatedUserCommandAction {}
+class RequestResetPasswordCommandAction {
+  final String username;
+
+  RequestResetPasswordCommandAction({required this.username});
+}
+
+class ResetPasswordSuccessEventAction {
+  final String username;
+
+  ResetPasswordSuccessEventAction({required this.username});
+}
+
+class ResetPasswordErrorEventAction {
+  final String username;
+  final AuthErrorType errorType;
+
+  ResetPasswordErrorEventAction({
+    required this.username,
+    required this.errorType,
+  });
+}
+
+class ConfirmResetPasswordCommandAction {
+  final String confirmationCode;
+  final String username;
+  final String password;
+
+  ConfirmResetPasswordCommandAction({
+    required this.confirmationCode,
+    required this.username,
+    required this.password,
+  });
+}
+
+class PasswordResetConfirmedEventAction {}
 
 class AuthenticatedUserEventAction {
   final User user;
 
   AuthenticatedUserEventAction({required this.user});
 }
-
-class SignOutCommandAction {}
-
-class SignedOutEventAction {}
 
 class AuthErrorEventAction {
   final AuthErrorType errorType;

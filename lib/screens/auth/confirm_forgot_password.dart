@@ -6,31 +6,25 @@ import 'package:flutter_amplify_auth/design/components/button.dart';
 import 'package:flutter_amplify_auth/design/components/screen_scrollable_view.dart';
 import 'package:flutter_amplify_auth/design/constants/spacings.dart';
 import 'package:flutter_amplify_auth/design/constants/text_styles.dart';
-import 'package:flutter_amplify_auth/design/theme/app_theme.dart';
 import 'package:flutter_amplify_auth/infrastructure/auth/auth_presenter.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
 import 'package:flutter_amplify_auth/redux/auth/auth_action.dart';
-import 'package:flutter_amplify_auth/screens/auth/confirm_sign_up.dart';
-import 'package:flutter_amplify_auth/screens/auth/forgot_password.dart';
-import 'package:flutter_amplify_auth/screens/auth/sign_up.dart';
-import 'package:flutter_amplify_auth/screens/home.dart';
+import 'package:flutter_amplify_auth/screens/auth/sign_in.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-class SignInPage extends StatefulWidget {
-  static const routeName = '/signInPage';
+class ConfirmResetPasswordPage extends StatefulWidget {
+  static const routeName = "/confirmResetPasswordPage";
 
-  const SignInPage({
-    super.key,
-  });
+  const ConfirmResetPasswordPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<ConfirmResetPasswordPage> createState() => _ConfirmResetPasswordPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _ConfirmResetPasswordPageState extends State<ConfirmResetPasswordPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   final _canSubmit = ValueNotifier(false);
 
@@ -40,10 +34,8 @@ class _SignInPageState extends State<SignInPage> {
       converter: (store) => AuthPresenter.present(authState: store.state.authState),
       distinct: true,
       onWillChange: (previousViewModel, newViewModel) {
-        if (newViewModel is AuthenticatedViewModel) {
-          Navigator.pushReplacementNamed(context, HomePage.routeName);
-        } else if (newViewModel is SignUpViewModel) {
-          Navigator.pushReplacementNamed(context, ConfirmSignUpPage.routeName);
+        if (newViewModel is AuthInitialViewModel) {
+          Navigator.pushReplacementNamed(context, SignInPage.routeName);
         }
       },
       builder: (context, viewModel) {
@@ -55,25 +47,13 @@ class _SignInPageState extends State<SignInPage> {
               children: [
                 SvgPicture.asset('assets/images/logo.svg'),
                 const SizedBox(height: Spacings.x_10),
-                Text("Welcome to app", style: TextStyles.heading4),
+                Text("Reset password", style: TextStyles.heading4),
                 const SizedBox(height: Spacings.x_2_5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have an account?", style: TextStyles.small),
-                    const SizedBox(width: Spacings.x_1),
-                    InkWell(
-                      onTap: () => Navigator.pushReplacementNamed(context, SignUpPage.routeName),
-                      child: Text(
-                        "Create an account",
-                        style: TextStyles.small.copyWith(color: AppTheme.getColors().font.interactive),
-                      ),
-                    ),
-                  ],
-                ),
+                Text("Time to reset your password. Ensure your account stays safe with a fresh password.",
+                    style: TextStyles.small, textAlign: TextAlign.center),
                 const SizedBox(height: Spacings.x_10),
-                if (viewModel is AuthErrorViewModel) ...[
-                  Alert(variant: AlertVariant.error, message: viewModel.message),
+                if (viewModel is ResetPasswordViewModel && viewModel.errorType != null) ...[
+                  Alert(variant: AlertVariant.error, message: viewModel.errorMessage),
                   const SizedBox(height: Spacings.x_10),
                 ],
                 FormBuilder(
@@ -82,18 +62,17 @@ class _SignInPageState extends State<SignInPage> {
                   child: Column(
                     children: [
                       FormBuilderField<String>(
-                        name: 'email',
+                        name: 'confirmationCode',
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
-                          FormBuilderValidators.email(),
                         ]),
                         builder: (FormFieldState field) {
                           return AmplifyTextField(
                             errorText: field.errorText,
                             onChanged: (value) => field.didChange(value),
-                            label: "Email",
-                            placeholder: "Enter your email address",
+                            label: "Confirmation code",
+                            placeholder: "Enter your code",
                           );
                         },
                       ),
@@ -101,6 +80,8 @@ class _SignInPageState extends State<SignInPage> {
                       FormBuilderField<String>(
                         name: 'password',
                         autovalidateMode: AutovalidateMode.onUserInteraction,
+                        initialValue: "",
+                        onChanged: (_) => _validateConfirmPassword(),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
                           FormBuilderValidators.minLength(8, errorText: "Password must be at least 8 characters"),
@@ -115,17 +96,23 @@ class _SignInPageState extends State<SignInPage> {
                         },
                       ),
                       const SizedBox(height: Spacings.x_4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          InkWell(
-                            onTap: () => Navigator.pushNamed(context, ForgotPasswordPage.routeName),
-                            child: Text(
-                              "Forgot password?",
-                              style: TextStyles.link.copyWith(color: AppTheme.getColors().font.interactive),
-                            ),
-                          ),
-                        ],
+                      FormBuilderField<String>(
+                        name: 'password_confirm',
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        initialValue: "",
+                        onChanged: (_) => _validateConfirmPassword(),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                          FormBuilderValidators.minLength(8, errorText: "Password must be at least 8 characters"),
+                        ]),
+                        builder: (FormFieldState field) {
+                          return AmplifyPasswordField(
+                            errorText: field.errorText,
+                            onChanged: (value) => field.didChange(value),
+                            label: "Confirm password",
+                            placeholder: "Enter your password",
+                          );
+                        },
                       ),
                       const SizedBox(height: Spacings.x_10),
                       ListenableBuilder(
@@ -134,15 +121,22 @@ class _SignInPageState extends State<SignInPage> {
                           loading: viewModel is AuthLoadingViewModel,
                           onPressed: _canSubmit.value
                               ? () {
-                                  final username = _formKey.currentState?.fields['email']?.value;
+                                  if (viewModel is! ResetPasswordViewModel) {
+                                    return;
+                                  }
+
+                                  final username = viewModel.username;
+                                  final confirmationCode = _formKey.currentState?.fields['confirmationCode']?.value;
                                   final password = _formKey.currentState?.fields['password']?.value;
 
-                                  StoreProvider.of<AppState>(context).dispatch(
-                                    SignInCommandAction(username: username, password: password),
-                                  );
+                                  StoreProvider.of<AppState>(context).dispatch(ConfirmResetPasswordCommandAction(
+                                    username: username,
+                                    password: password,
+                                    confirmationCode: confirmationCode,
+                                  ));
                                 }
                               : null,
-                          text: "Sign in",
+                          text: "Confirm",
                         ),
                       ),
                     ],
@@ -164,5 +158,21 @@ class _SignInPageState extends State<SignInPage> {
       final isValid = _formKey.currentState?.isValid ?? false;
       _canSubmit.value = isValid;
     });
+  }
+
+  void _validateConfirmPassword() {
+    final password = _formKey.currentState?.fields['password']?.value as String?;
+    final confirmPassword = _formKey.currentState?.fields['password_confirm']?.value as String?;
+
+    if (confirmPassword == null || confirmPassword.isEmpty) {
+      return;
+    }
+
+    if (password == confirmPassword) {
+      _formKey.currentState?.fields['password_confirm']?.validate(clearCustomError: true);
+      return;
+    }
+
+    _formKey.currentState?.fields['password_confirm']?.invalidate("Passwords do not match", shouldFocus: false);
   }
 }
