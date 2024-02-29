@@ -10,6 +10,7 @@ class AmplifyTextField extends StatelessWidget {
   final String placeholder;
   final String? errorText;
   final AmplifyTextFieldSize size;
+  final TextEditingController? controller;
   final void Function(String)? onChanged;
 
   const AmplifyTextField({
@@ -18,6 +19,7 @@ class AmplifyTextField extends StatelessWidget {
     this.placeholder = "",
     this.onChanged,
     this.errorText,
+    this.controller,
     this.size = AmplifyTextFieldSize.medium,
   });
 
@@ -41,6 +43,7 @@ class AmplifyTextField extends StatelessWidget {
           ),
           child: CupertinoTextField.borderless(
             placeholder: placeholder,
+            controller: controller,
             placeholderStyle: const TextStyle(color: Colors.grey),
             padding: const EdgeInsets.symmetric(
               horizontal: 16,

@@ -1,13 +1,12 @@
-import 'package:amplify_api/amplify_api.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_amplify_auth/design/constants/text_styles.dart';
+import 'package:flutter_amplify_auth/design/theme/app_theme.dart';
 import 'package:flutter_amplify_auth/infrastructure/auth/auth_presenter.dart';
-import 'package:flutter_amplify_auth/models/Todo.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
 import 'package:flutter_amplify_auth/redux/auth/auth_action.dart';
-import 'package:flutter_amplify_auth/redux/auth/auth_state.dart';
-import 'package:flutter_amplify_auth/screens/add_todo.dart';
 import 'package:flutter_amplify_auth/screens/auth/sign_in.dart';
+import 'package:flutter_amplify_auth/screens/home/add_todo.dart';
+import 'package:flutter_amplify_auth/screens/home/todos.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,51 +19,49 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void _incrementCounter() async {
-    try {
-      final newTodo = Todo(
-        name: 'My first todo',
-        description: 'Hello world!',
-      );
-      final request = ModelMutations.create(newTodo);
-      print(Amplify.isConfigured);
-      final response = await Amplify.API.mutate(request: request).response;
-      final data = response.data;
-      print(data);
-    } catch (error) {
-      print(error);
-    }
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_getPageTitle()),
+        actions: const [_LogoutActionButton()],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppTheme.getColors().brand.primary,
+        backgroundColor: AppTheme.getColors().background.tertiary,
+        selectedLabelStyle: TextStyles.small,
+        onTap: (value) => setState(() => _selectedIndex = value),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Todos"),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: "Add todo"),
+        ],
+      ),
+      body: _buildPage(),
+    );
   }
 
-  void _getAuthenticatedUser() async {
-    try {
-      final response = await Amplify.Auth.getCurrentUser();
-      print(response);
-    } catch (error) {
-      print(error);
+  Widget _buildPage() {
+    if (_selectedIndex == 1) {
+      return const AddTodoPage();
     }
+
+    return const TodosPage();
   }
 
-  void _logout() async {
-    try {
-      await Amplify.Auth.signOut();
-    } catch (error) {
-      print(error);
+  String _getPageTitle() {
+    if (_selectedIndex == 1) {
+      return "Add Todo";
     }
-  }
 
-  Future<void> _signIn() async {
-    try {
-      final result = await Amplify.Auth.signIn(
-        username: "ilie.lupu+1@thinslices.com",
-        password: "12345678",
-      );
-
-      print(result);
-    } catch (error) {
-      print("Login error: $error");
-    }
+    return "Todos";
   }
+}
+
+class _LogoutActionButton extends StatelessWidget {
+  const _LogoutActionButton();
 
   @override
   Widget build(BuildContext context) {
@@ -76,31 +73,30 @@ class _HomePageState extends State<HomePage> {
           Navigator.pushNamedAndRemoveUntil(context, SignInPage.routeName, (route) => false);
         }
       },
-      builder: (context, viewModel) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: const Text("Home"),
-          ),
-          body: Column(
-            children: [
-              Text(
-                'Hello',
-              ),
-              ElevatedButton(onPressed: _incrementCounter, child: Text("Add todo")),
-              ElevatedButton(onPressed: _getAuthenticatedUser, child: Text("Get user")),
-              ElevatedButton(onPressed: _signIn, child: Text("Sign in")),
-              ElevatedButton(
-                  onPressed: () => StoreProvider.of<AppState>(context).dispatch(SignOutCommandAction()),
-                  child: Text("Logout")),
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, AddTodoPage.routeName),
-                child: Text("Add todo page"),
-              )
-            ],
-          ),
-        );
-      },
+      builder: (context, viewModel) => IconButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Logout"),
+              content: const Text("Are you sure you want to logout?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    StoreProvider.of<AppState>(context).dispatch(SignOutCommandAction());
+                  },
+                  child: const Text("Logout"),
+                ),
+              ],
+            ),
+          );
+        },
+        icon: const Icon(Icons.logout),
+      ),
     );
   }
 }

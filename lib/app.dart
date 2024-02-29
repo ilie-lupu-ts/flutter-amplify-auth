@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_amplify_auth/design/theme/default.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
-import 'package:flutter_amplify_auth/screens/add_todo.dart';
 import 'package:flutter_amplify_auth/screens/auth/confirm_forgot_password.dart';
 import 'package:flutter_amplify_auth/screens/auth/confirm_sign_up.dart';
 import 'package:flutter_amplify_auth/screens/auth/forgot_password.dart';
@@ -24,6 +23,7 @@ class App extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: defaultLightTheme,
+        debugShowCheckedModeBanner: false,
         initialRoute: LoadingPage.routeName,
         routes: {
           LoadingPage.routeName: (context) => const LoadingPage(),
@@ -33,7 +33,6 @@ class App extends StatelessWidget {
           ForgotPasswordPage.routeName: (context) => const ForgotPasswordPage(),
           ConfirmResetPasswordPage.routeName: (context) => const ConfirmResetPasswordPage(),
           HomePage.routeName: (context) => const HomePage(),
-          AddTodoPage.routeName: (context) => const AddTodoPage(),
         },
       ),
     );
