@@ -1,1 +1,8 @@
-enum AuthErrorType { notSignedIn, userNotFound, unknown }
+enum AuthErrorType {
+  notSignedIn,
+  userNotFound,
+  usernameExists,
+  wrongConfirmationCode,
+  userNotConfirmed,
+  unknown,
+}

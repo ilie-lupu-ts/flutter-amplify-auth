@@ -25,7 +25,7 @@ class Button extends StatelessWidget {
     final textColor = _getTextColor();
 
     return InkWell(
-      onTap: onPressed,
+      onTap: loading ? null : onPressed,
       child: Container(
         height: 40,
         decoration: BoxDecoration(

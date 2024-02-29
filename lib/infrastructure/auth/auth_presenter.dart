@@ -7,6 +7,13 @@ class AuthPresenter {
   static AuthViewModel present({required AuthState authState}) {
     if (authState is AuthenticatedState) {
       return AuthenticatedViewModel(user: authState.user);
+    } else if (authState is AuthSignUpState) {
+      return SignUpConfirmViewModel(
+        userId: authState.userId,
+        codeDeliveryDestination: authState.codeDeliveryDestination,
+        isLoading: authState.isLoading,
+        errorType: authState.errorType,
+      );
     } else if (authState is AuthLoadingState) {
       return AuthLoadingViewModel();
     } else if (authState is AuthErrorState) {
@@ -37,13 +44,7 @@ class AuthErrorViewModel extends AuthViewModel {
 
   AuthErrorViewModel({required this.errorType});
 
-  String get message {
-    if (errorType == AuthErrorType.userNotFound) {
-      return "This email address is not associated with any account";
-    }
-
-    return "An error occurred";
-  }
+  String get message => _mapErrorTypeToMessage(errorType);
 
   @override
   List<Object?> get props => [errorType];
@@ -56,4 +57,35 @@ class AuthenticatedViewModel extends AuthViewModel {
 
   @override
   List<Object?> get props => [];
+}
+
+class SignUpConfirmViewModel extends AuthViewModel {
+  final String userId;
+  final String codeDeliveryDestination;
+  final bool isLoading;
+  final AuthErrorType? errorType;
+
+  SignUpConfirmViewModel({
+    required this.userId,
+    required this.codeDeliveryDestination,
+    required this.isLoading,
+    this.errorType,
+  });
+
+  String get errorMessage => errorType != null ? _mapErrorTypeToMessage(errorType!) : "";
+
+  @override
+  List<Object?> get props => [userId, codeDeliveryDestination, isLoading, errorType];
+}
+
+String _mapErrorTypeToMessage(AuthErrorType errorType) {
+  if (errorType == AuthErrorType.userNotFound) {
+    return "This email address is not associated with any account";
+  } else if (errorType == AuthErrorType.usernameExists) {
+    return "This email address is already in use";
+  } else if (errorType == AuthErrorType.wrongConfirmationCode) {
+    return "The code you entered is incorrect";
+  }
+
+  return "An error occurred";
 }

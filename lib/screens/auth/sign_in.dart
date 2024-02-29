@@ -1,17 +1,16 @@
-import 'dart:developer';
-
-import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_amplify_auth/design/components/alert.dart';
 import 'package:flutter_amplify_auth/design/components/amplify_password_field.dart';
 import 'package:flutter_amplify_auth/design/components/amplify_text_field.dart';
 import 'package:flutter_amplify_auth/design/components/button.dart';
+import 'package:flutter_amplify_auth/design/components/screen_scrollable_view.dart';
 import 'package:flutter_amplify_auth/design/constants/spacings.dart';
 import 'package:flutter_amplify_auth/design/constants/text_styles.dart';
 import 'package:flutter_amplify_auth/design/theme/app_theme.dart';
 import 'package:flutter_amplify_auth/infrastructure/auth/auth_presenter.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
 import 'package:flutter_amplify_auth/redux/auth/auth_action.dart';
+import 'package:flutter_amplify_auth/screens/auth/confirm_sign_up.dart';
 import 'package:flutter_amplify_auth/screens/auth/forgot_password.dart';
 import 'package:flutter_amplify_auth/screens/auth/sign_up.dart';
 import 'package:flutter_amplify_auth/screens/home.dart';
@@ -43,12 +42,13 @@ class _SignInPageState extends State<SignInPage> {
       onWillChange: (previousViewModel, newViewModel) {
         if (newViewModel is AuthenticatedViewModel) {
           Navigator.pushReplacementNamed(context, HomePage.routeName);
+        } else if (newViewModel is SignUpConfirmViewModel) {
+          Navigator.pushReplacementNamed(context, ConfirmSignUpPage.routeName);
         }
       },
       builder: (context, viewModel) {
         return Scaffold(
-          appBar: AppBar(),
-          body: SingleChildScrollView(
+          body: ScreenScrollableView(
             padding: const EdgeInsets.symmetric(horizontal: Spacings.screenHorizontal),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -63,7 +63,7 @@ class _SignInPageState extends State<SignInPage> {
                     Text("Don't have an account?", style: TextStyles.small),
                     const SizedBox(width: Spacings.x_1),
                     InkWell(
-                      onTap: () => Navigator.pushNamed(context, SignUpPage.routeName),
+                      onTap: () => Navigator.pushReplacementNamed(context, SignUpPage.routeName),
                       child: Text(
                         "Create an account",
                         style: TextStyles.small.copyWith(color: AppTheme.getColors().font.interactive),
@@ -142,7 +142,7 @@ class _SignInPageState extends State<SignInPage> {
                                   );
                                 }
                               : null,
-                          text: "Sign In",
+                          text: "Sign in",
                         ),
                       ),
                     ],
@@ -158,26 +158,11 @@ class _SignInPageState extends State<SignInPage> {
 
   void _onFormChanged() {
     final isValid = _formKey.currentState?.isValid ?? false;
-    log("Form is valid: $isValid");
     _canSubmit.value = isValid;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final isValid = _formKey.currentState?.isValid ?? false;
-      print("Form is valid: $isValid");
       _canSubmit.value = isValid;
     });
-  }
-
-  Future<void> _signIn() async {
-    try {
-      final result = await Amplify.Auth.signIn(
-        username: "ilie.lupu+1@thinslices.com",
-        password: "12345678",
-      );
-
-      print(result);
-    } catch (error) {
-      print("Login error: $error");
-    }
   }
 }

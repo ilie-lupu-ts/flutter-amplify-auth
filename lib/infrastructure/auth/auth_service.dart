@@ -26,6 +26,48 @@ class AuthService {
     }
   }
 
+  Future<AuthServiceResponse> signUp({required String email, required String password}) async {
+    try {
+      final signUpResult = await amplifyAuth.signUp(
+        username: email,
+        password: password,
+        options: SignUpOptions(
+          userAttributes: {
+            AuthUserAttributeKey.email: email,
+          },
+        ),
+      );
+
+      if (signUpResult.nextStep.signUpStep == AuthSignUpStep.confirmSignUp) {
+        final userId = signUpResult.userId ?? "";
+        final codeDeliveryAddress = signUpResult.nextStep.codeDeliveryDetails?.destination ?? "";
+
+        return SignUpSuccessResponse(userId: userId, codeDeliveryDestination: codeDeliveryAddress);
+      }
+
+      return AuthServiceErrorResponse(errorType: AuthErrorType.unknown);
+    } catch (error) {
+      return _processError(error);
+    }
+  }
+
+  Future<AuthServiceResponse> confirmSignUp({required String username, required String confirmationCode}) async {
+    try {
+      final confirmSignUpResult = await amplifyAuth.confirmSignUp(
+        username: username,
+        confirmationCode: confirmationCode,
+      );
+
+      if (confirmSignUpResult.nextStep.signUpStep == AuthSignUpStep.done && confirmSignUpResult.isSignUpComplete) {
+        return SignUpConfirmSuccessResponse(userId: username);
+      }
+
+      return AuthServiceErrorResponse(errorType: AuthErrorType.unknown);
+    } catch (error) {
+      return _processError(error);
+    }
+  }
+
   Future<AuthServiceResponse> signIn({required String username, required String password}) async {
     try {
       final signInResult = await amplifyAuth.signIn(
@@ -40,7 +82,7 @@ class AuthService {
         return SignInSuccessResponse(user: user);
       }
 
-      return SignInSuccessResponse(nextStep: signInResult.nextStep);
+      return AuthServiceErrorResponse(errorType: AuthErrorType.userNotConfirmed);
     } catch (error) {
       return _processError(error);
     }
@@ -56,9 +98,26 @@ class AuthService {
     }
   }
 
+  Future<AuthServiceResponse> sendSignUpCode({required String username}) async {
+    try {
+      final response = await amplifyAuth.resendSignUpCode(username: username);
+      final codeDeliveryDestination = response.codeDeliveryDetails.destination ?? "";
+
+      return SendSignUpCodeSuccessResponse(codeDeliveryDestination: codeDeliveryDestination);
+    } catch (error) {
+      return _processError(error);
+    }
+  }
+
   AuthServiceResponse _processError(dynamic error) {
-    if (error is UserNotFoundException || error is NotAuthorizedServiceException) {
+    if (error is UserNotFoundException) {
       return AuthServiceErrorResponse(errorType: AuthErrorType.userNotFound);
+    } else if (error is NotAuthorizedServiceException) {
+      return AuthServiceErrorResponse(errorType: AuthErrorType.notSignedIn);
+    } else if (error is UsernameExistsException) {
+      return AuthServiceErrorResponse(errorType: AuthErrorType.usernameExists);
+    } else if (error is CodeMismatchException) {
+      return AuthServiceErrorResponse(errorType: AuthErrorType.wrongConfirmationCode);
     }
 
     return AuthServiceErrorResponse(errorType: AuthErrorType.unknown);
@@ -79,14 +138,41 @@ class GetAuthenticatedUserSuccessResponse extends AuthServiceResponse {
   List<Object?> get props => [user];
 }
 
-class SignInSuccessResponse extends AuthServiceResponse {
-  final User? user;
-  final AuthNextSignInStep? nextStep;
+class SignUpSuccessResponse extends AuthServiceResponse {
+  final String userId;
+  final String codeDeliveryDestination;
 
-  SignInSuccessResponse({this.user, this.nextStep});
+  SignUpSuccessResponse({required this.userId, required this.codeDeliveryDestination});
 
   @override
-  List<Object?> get props => [user, nextStep];
+  List<Object?> get props => [userId, codeDeliveryDestination];
+}
+
+class SignInSuccessResponse extends AuthServiceResponse {
+  final User user;
+
+  SignInSuccessResponse({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}
+
+class SignUpConfirmSuccessResponse extends AuthServiceResponse {
+  final String userId;
+
+  SignUpConfirmSuccessResponse({required this.userId});
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+class SendSignUpCodeSuccessResponse extends AuthServiceResponse {
+  final String codeDeliveryDestination;
+
+  SendSignUpCodeSuccessResponse({required this.codeDeliveryDestination});
+
+  @override
+  List<Object?> get props => [codeDeliveryDestination];
 }
 
 class SignOutSuccessResponse extends AuthServiceResponse {}

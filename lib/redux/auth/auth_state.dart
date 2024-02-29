@@ -11,6 +11,25 @@ class AuthInitialState extends AuthState {}
 
 class AuthLoadingState extends AuthState {}
 
+class AuthSignUpState extends AuthState {
+  final String userId;
+  final String password;
+  final String codeDeliveryDestination;
+  final bool isLoading;
+  final AuthErrorType? errorType;
+
+  AuthSignUpState({
+    required this.userId,
+    required this.password,
+    required this.codeDeliveryDestination,
+    this.isLoading = false,
+    this.errorType,
+  });
+
+  @override
+  List<Object> get props => [userId, password, codeDeliveryDestination, isLoading];
+}
+
 class AuthenticatedState extends AuthState {
   final User user;
 

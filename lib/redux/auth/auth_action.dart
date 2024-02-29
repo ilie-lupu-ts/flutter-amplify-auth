@@ -1,4 +1,3 @@
-import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter_amplify_auth/models/auth/User.dart';
 import 'package:flutter_amplify_auth/models/auth/error_type.dart';
 
@@ -11,29 +10,59 @@ class SignInCommandAction {
   SignInCommandAction({required this.username, required this.password});
 }
 
-class GetAuthenticatedUserCommandAction {}
-
-class GetAuthenticatedUserSuccessEventAction {
-  final User user;
-
-  GetAuthenticatedUserSuccessEventAction({required this.user});
-}
-
-class SignOutCommandAction {}
-
-class SignedOutEventAction {}
-
 class SignInSuccessEventAction {
   final User user;
 
   SignInSuccessEventAction({required this.user});
 }
 
-class SignInNextStepEventAction {
-  final AuthNextSignInStep nextStep;
+class SignUpCommandAction {
+  final String email;
+  final String password;
 
-  SignInNextStepEventAction({required this.nextStep});
+  SignUpCommandAction({required this.email, required this.password});
 }
+
+class SignUpSuccessEventAction {
+  final String userId;
+  final String password;
+  final String codeDeliveryDestination;
+
+  SignUpSuccessEventAction({required this.userId, required this.password, required this.codeDeliveryDestination});
+}
+
+class ConfirmSignUpCommandAction {
+  final String confirmationCode;
+
+  ConfirmSignUpCommandAction({required this.confirmationCode});
+}
+
+class SignUpConfirmLoadingEventAction {
+  final String userId;
+  final String codeDeliveryDestination;
+
+  SignUpConfirmLoadingEventAction({required this.userId, required this.codeDeliveryDestination});
+}
+
+class SignUpConfirmErrorEventAction {
+  final String userId;
+  final String codeDeliveryDestination;
+  final AuthErrorType errorType;
+
+  SignUpConfirmErrorEventAction({required this.userId, required this.codeDeliveryDestination, required this.errorType});
+}
+
+class GetAuthenticatedUserCommandAction {}
+
+class AuthenticatedUserEventAction {
+  final User user;
+
+  AuthenticatedUserEventAction({required this.user});
+}
+
+class SignOutCommandAction {}
+
+class SignedOutEventAction {}
 
 class AuthErrorEventAction {
   final AuthErrorType errorType;
