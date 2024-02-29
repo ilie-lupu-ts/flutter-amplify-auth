@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_amplify_auth/screens/auth/sign_in.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
+  static const routeName = "/forgotPasswordPage";
+
   const ForgotPasswordPage({super.key});
 
   @override
@@ -13,7 +16,9 @@ class ForgotPasswordPage extends StatelessWidget {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, SignInPage.routeName);
+              },
               child: const Text('To Sign In'),
             ),
           ],

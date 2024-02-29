@@ -1,5 +1,6 @@
 import 'package:flutter_amplify_auth/infrastructure/auth/auth_middleware.dart';
 import 'package:flutter_amplify_auth/infrastructure/auth/auth_service.dart';
+import 'package:flutter_amplify_auth/infrastructure/debug/action_logger_middleware.dart';
 import 'package:flutter_amplify_auth/redux/app_reducer.dart';
 import 'package:flutter_amplify_auth/redux/app_state.dart';
 import 'package:redux/redux.dart';
@@ -13,6 +14,7 @@ Store<AppState> createStore({
     initialState: initialState,
     middleware: [
       AuthMiddleware(authService: authService),
+      ActionLoggerMiddleware(),
     ],
   );
 }
