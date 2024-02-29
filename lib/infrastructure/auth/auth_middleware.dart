@@ -79,6 +79,7 @@ class AuthMiddleware extends MiddlewareClass<AppState> {
       store.dispatch(SignUpConfirmLoadingEventAction(
         userId: state.userId,
         codeDeliveryDestination: state.codeDeliveryDestination,
+        requestedNewConfirmationCode: false,
       ));
 
       final response = await authService.confirmSignUp(
@@ -116,6 +117,32 @@ class AuthMiddleware extends MiddlewareClass<AppState> {
       final response = await authService.signOut();
       if (response is SignOutSuccessResponse) {
         store.dispatch(SignedOutEventAction());
+      } else if (response is AuthServiceErrorResponse) {
+        store.dispatch(AuthErrorEventAction(errorType: response.errorType));
+      }
+    }
+
+    if (action is RequestSignUpConfirmationCodeCommandAction) {
+      if (store.state.authState is! AuthSignUpState) {
+        store.dispatch(AuthErrorEventAction(errorType: AuthErrorType.unknown));
+        return;
+      }
+
+      final state = store.state.authState as AuthSignUpState;
+      store.dispatch(SignUpConfirmLoadingEventAction(
+        userId: state.userId,
+        codeDeliveryDestination: state.codeDeliveryDestination,
+        requestedNewConfirmationCode: true,
+      ));
+
+      final response = await authService.sendSignUpCode(username: action.username);
+
+      if (response is SendSignUpCodeSuccessResponse) {
+        store.dispatch(SignUpSuccessEventAction(
+          userId: action.username,
+          password: state.password,
+          codeDeliveryDestination: response.codeDeliveryDestination,
+        ));
       } else if (response is AuthServiceErrorResponse) {
         store.dispatch(AuthErrorEventAction(errorType: response.errorType));
       }

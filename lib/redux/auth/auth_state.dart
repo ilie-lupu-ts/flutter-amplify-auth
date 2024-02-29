@@ -16,6 +16,7 @@ class AuthSignUpState extends AuthState {
   final String password;
   final String codeDeliveryDestination;
   final bool isLoading;
+  final bool isRequestingConfirmationCode;
   final AuthErrorType? errorType;
 
   AuthSignUpState({
@@ -23,11 +24,12 @@ class AuthSignUpState extends AuthState {
     required this.password,
     required this.codeDeliveryDestination,
     this.isLoading = false,
+    this.isRequestingConfirmationCode = false,
     this.errorType,
   });
 
   @override
-  List<Object> get props => [userId, password, codeDeliveryDestination, isLoading];
+  List<Object> get props => [userId, password, codeDeliveryDestination, isLoading, isRequestingConfirmationCode];
 }
 
 class AuthenticatedState extends AuthState {

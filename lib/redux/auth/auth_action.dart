@@ -40,8 +40,13 @@ class ConfirmSignUpCommandAction {
 class SignUpConfirmLoadingEventAction {
   final String userId;
   final String codeDeliveryDestination;
+  final bool requestedNewConfirmationCode;
 
-  SignUpConfirmLoadingEventAction({required this.userId, required this.codeDeliveryDestination});
+  SignUpConfirmLoadingEventAction({
+    required this.userId,
+    required this.codeDeliveryDestination,
+    required this.requestedNewConfirmationCode,
+  });
 }
 
 class SignUpConfirmErrorEventAction {
@@ -50,6 +55,12 @@ class SignUpConfirmErrorEventAction {
   final AuthErrorType errorType;
 
   SignUpConfirmErrorEventAction({required this.userId, required this.codeDeliveryDestination, required this.errorType});
+}
+
+class RequestSignUpConfirmationCodeCommandAction {
+  final String username;
+
+  RequestSignUpConfirmationCodeCommandAction({required this.username});
 }
 
 class GetAuthenticatedUserCommandAction {}

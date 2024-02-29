@@ -12,6 +12,7 @@ class AuthPresenter {
         userId: authState.userId,
         codeDeliveryDestination: authState.codeDeliveryDestination,
         isLoading: authState.isLoading,
+        isRequestingConfirmationCode: authState.isRequestingConfirmationCode,
         errorType: authState.errorType,
       );
     } else if (authState is AuthLoadingState) {
@@ -63,19 +64,23 @@ class SignUpConfirmViewModel extends AuthViewModel {
   final String userId;
   final String codeDeliveryDestination;
   final bool isLoading;
+  final bool isRequestingConfirmationCode;
   final AuthErrorType? errorType;
 
   SignUpConfirmViewModel({
     required this.userId,
     required this.codeDeliveryDestination,
     required this.isLoading,
+    required this.isRequestingConfirmationCode,
     this.errorType,
   });
 
   String get errorMessage => errorType != null ? _mapErrorTypeToMessage(errorType!) : "";
 
+  bool get canRequestNewCode => !isRequestingConfirmationCode && !isLoading;
+
   @override
-  List<Object?> get props => [userId, codeDeliveryDestination, isLoading, errorType];
+  List<Object?> get props => [userId, codeDeliveryDestination, isLoading, errorType, isRequestingConfirmationCode];
 }
 
 String _mapErrorTypeToMessage(AuthErrorType errorType) {

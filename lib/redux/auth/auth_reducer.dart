@@ -21,7 +21,8 @@ AuthState authReducer(AuthState state, dynamic action) {
       userId: action.userId,
       password: state.password,
       codeDeliveryDestination: action.codeDeliveryDestination,
-      isLoading: true,
+      isLoading: !action.requestedNewConfirmationCode,
+      isRequestingConfirmationCode: action.requestedNewConfirmationCode,
     );
   } else if (action is SignUpConfirmErrorEventAction && state is AuthSignUpState) {
     return AuthSignUpState(

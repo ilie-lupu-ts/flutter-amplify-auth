@@ -85,10 +85,19 @@ class _ConfirmSignUpPageState extends State<ConfirmSignUpPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           InkWell(
-                            onTap: () {},
+                            onTap: viewModel is SignUpConfirmViewModel && !viewModel.isRequestingConfirmationCode
+                                ? () {
+                                    StoreProvider.of<AppState>(context).dispatch(
+                                      RequestSignUpConfirmationCodeCommandAction(username: viewModel.userId),
+                                    );
+                                  }
+                                : null,
                             child: Text(
                               "Request a new code",
-                              style: TextStyles.link.copyWith(color: AppTheme.getColors().font.interactive),
+                              style: TextStyles.link.copyWith(
+                                  color: viewModel is SignUpConfirmViewModel && viewModel.canRequestNewCode
+                                      ? AppTheme.getColors().font.interactive
+                                      : AppTheme.getColors().font.disabled),
                             ),
                           ),
                         ],
