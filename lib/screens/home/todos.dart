@@ -1,8 +1,9 @@
 import 'package:amplify_api/amplify_api.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_amplify_auth/design/components/screen_scrollable_view.dart';
 import 'package:flutter_amplify_auth/design/constants/spacings.dart';
+import 'package:flutter_amplify_auth/design/constants/text_styles.dart';
+import 'package:flutter_amplify_auth/design/theme/app_theme.dart';
 import 'package:flutter_amplify_auth/models/Todo.dart';
 
 class TodosPage extends StatelessWidget {
@@ -10,30 +11,41 @@ class TodosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenScrollableView(
-      padding: const EdgeInsets.symmetric(horizontal: Spacings.screenHorizontal),
-      child: Column(
-        children: [
-          FutureBuilder(
-              future: _getTodos(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
+    return Column(
+      children: [
+        FutureBuilder(
+            future: _getTodos(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
                 final todos = snapshot.data as List<Todo?>;
 
-                return Column(
-                  children: todos.map((todo) {
+                if (todos.isEmpty) {
+                  return Center(child: Text("No todos found", style: TextStyles.medium));
+                }
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: todos.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: Spacings.x_2_5),
+                  itemBuilder: (context, todoIndex) {
+                    final todo = todos[todoIndex];
+
                     return ListTile(
-                      title: Text(todo?.name ?? ""),
+                      title: Text(
+                        todo?.name ?? "",
+                        style: TextStyles.regular.copyWith(color: AppTheme.getColors().font.interactive),
+                      ),
                       subtitle: Text(todo?.description ?? ""),
+                      tileColor: AppTheme.getColors().background.tertiary,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: Spacings.x_4),
                     );
-                  }).toList(),
+                  },
                 );
-              })
-        ],
-      ),
+              }
+
+              return const Center(child: CircularProgressIndicator());
+            })
+      ],
     );
   }
 

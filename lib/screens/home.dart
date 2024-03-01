@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
         selectedLabelStyle: TextStyles.small,
         onTap: (value) => setState(() => _selectedIndex = value),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Todos"),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), label: "Todos"),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: "Add todo"),
         ],
       ),
