@@ -35,7 +35,7 @@ class _ConfirmResetPasswordPageState extends State<ConfirmResetPasswordPage> {
       distinct: true,
       onWillChange: (previousViewModel, newViewModel) {
         if (newViewModel is AuthInitialViewModel) {
-          Navigator.pushReplacementNamed(context, SignInPage.routeName);
+          Navigator.pushNamedAndRemoveUntil(context, SignInPage.routeName, (route) => false);
         }
       },
       builder: (context, viewModel) {

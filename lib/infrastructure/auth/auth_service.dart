@@ -147,7 +147,7 @@ class AuthService {
     if (error is UserNotFoundException) {
       return AuthServiceErrorResponse(errorType: AuthErrorType.userNotFound);
     } else if (error is NotAuthorizedServiceException) {
-      return AuthServiceErrorResponse(errorType: AuthErrorType.notSignedIn);
+      return AuthServiceErrorResponse(errorType: AuthErrorType.userNotFound);
     } else if (error is UsernameExistsException) {
       return AuthServiceErrorResponse(errorType: AuthErrorType.usernameExists);
     } else if (error is CodeMismatchException) {
